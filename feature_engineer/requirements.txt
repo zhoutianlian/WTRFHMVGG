@@ -1,0 +1,50 @@
+# PostgreSQL-based BTC Feature Engineering Pipeline Requirements
+
+# Core dependencies
+pandas>=1.5.0
+numpy>=1.20.0
+
+# Database (PostgreSQL)
+psycopg2-binary>=2.9.0
+
+# Machine learning and clustering
+scikit-learn>=1.0.0
+
+# Signal processing and filtering
+PyWavelets>=1.3.0
+pykalman>=0.9.5
+
+# API and networking
+requests>=2.28.0
+tenacity>=8.0.0
+
+# Configuration
+PyYAML>=6.0
+
+# Logging (built into Python)
+# logging
+
+# Date/time handling (built into Python)
+# datetime
+
+# Optional: Advanced data formats
+pyarrow>=10.0.0  # For Parquet support
+
+# Optional: Jupyter notebook integration
+# jupyter>=1.0.0
+# ipykernel>=6.0.0
+
+# Optional: Visualization (for debugging)
+# matplotlib>=3.5.0
+# seaborn>=0.11.0
+# plotly>=5.0.0
+
+# Development and testing (optional)
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+# black>=22.0.0
+# flake8>=5.0.0
+
+# Production deployment (optional)
+# gunicorn>=20.0.0  # For web API deployment
+# supervisor>=4.0.0  # For process management

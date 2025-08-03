@@ -1,0 +1,69 @@
+# Default Configuration for BTC Feature Engineering Pipeline
+
+# Database Configuration (PostgreSQL)
+database:
+  host: localhost
+  port: 5432
+  database: btc_analysis
+  user: postgres
+  password: postgres
+
+# Glassnode API Configuration
+glassnode:
+  api_key: ""  # Set your Glassnode API key here or use GLASSNODE_API_KEY env var
+  base_url: "https://api.glassnode.com/v1/"
+  requests_per_minute: 10  # Free tier limit
+
+# Logging Configuration
+logging:
+  level: INFO
+  file: btc_pipeline.log
+  max_size_mb: 100
+  backup_count: 5
+
+# Processing Configuration
+processing:
+  batch_size: 10000  # Number of records to process at once
+  default_days_back: 30  # Default days to look back for data
+  max_age_hours: 2  # Maximum age before data is considered stale
+
+# Feature Engineering Configuration
+features:
+  # RPN (Risk Priority Number) Features
+  rpn:
+    wavelet: coif3  # Wavelet type for CWT detrending
+    level: 6  # Decomposition level
+    ema_span_diff: 16  # EMA span for diff_ls smoothing
+    ema_span_lld: 12  # EMA span for lld smoothing
+    extreme_window_hours: 720  # Window for extreme detection (30 days)
+  
+  # Binning Features
+  bin:
+    n_clusters: 9  # Number of K-means clusters
+    momentum_window_hours: 720  # Window for momentum calculation (30 days)
+  
+  # Dominance Features
+  dominance:
+    classification_enabled: true  # Enable dominance classification
+  
+  # Signal Features
+  signals:
+    beta_window: 8  # Window for beta calculation
+    ceiling_bottom_enabled: true  # Enable ceiling/bottom detection
+    reversal_enabled: true  # Enable reversal detection
+
+# Data Quality Configuration
+data_quality:
+  outlier_threshold: 3  # Standard deviations for outlier detection
+  min_data_points: 100  # Minimum data points required for processing
+  interpolation_limit: 3  # Maximum consecutive NaN values to interpolate
+
+# Export Configuration
+export:
+  default_format: csv
+  supported_formats: [csv, json, parquet]
+  training_data:
+    min_hours_between_signals: 6
+    balance_classes: false
+    test_split: 0.2
+    validation_split: 0.15

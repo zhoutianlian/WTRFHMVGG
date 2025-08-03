@@ -1,0 +1,332 @@
+# FHMV Model Training Configuration
+# =================================
+# Comprehensive hyperparameter configuration for FHMV model training
+# All parameters with descriptions, value ranges, and recommended settings
+
+# Model Architecture Parameters
+# =============================
+model_architecture:
+  # Number of final FHMV regimes (market states)
+  # Usage: Controls complexity of regime identification
+  # Range: 3-10 (typical financial markets)
+  # Recommended: 6 (ST, VT, RC, RHA, HPEM, AMB)
+  num_fhmv_regimes: 6
+  
+  # Number of combined states before mapping to final regimes
+  # Usage: Intermediate states for better regime separation
+  # Range: 8-20 (should be > num_fhmv_regimes)
+  # Recommended: 16 (provides good granularity)
+  num_combined_states: 16
+  
+  # Number of input features
+  # Usage: Dimensionality of feature space
+  # Range: 8-15 (FHMV constraint: typically 10)
+  # Recommended: 10 (LM, SR, Abs, RoC, RoC², P, T, Vol, RPN, Delta)
+  num_features: 10
+  
+  # Number of mixture components for Student's t-distributions
+  # Usage: Complexity of emission distributions
+  # Range: 1-5 (higher = more flexible, slower training)
+  # Recommended: 3 (good balance of flexibility and speed)
+  num_mixture_components: 3
+
+# Student's t-Distribution Parameters
+# ==================================
+student_t_params:
+  # Degrees of freedom bounds for Student's t-distributions
+  # Usage: Controls tail heaviness (fat tails for financial data)
+  # Range: [1.5, 50.0] (lower = heavier tails)
+  # Recommended: [2.1, 30.0] (captures financial fat tails)
+  dof_bounds:
+    min: 2.1
+    max: 30.0
+  
+  # Initial DoF value for optimization
+  # Usage: Starting point for DoF estimation
+  # Range: 2.0-10.0
+  # Recommended: 5.0 (moderate fat tails)
+  initial_dof: 5.0
+  
+  # DoF optimization tolerance
+  # Usage: Convergence criteria for DoF estimation
+  # Range: 1e-6 to 1e-3
+  # Recommended: 1e-4 (good balance of accuracy and speed)
+  dof_tolerance: 1e-4
+  
+  # Maximum iterations for DoF root finding
+  # Usage: Prevents infinite loops in DoF estimation
+  # Range: 50-500
+  # Recommended: 100 (sufficient for most cases)
+  max_dof_iterations: 100
+
+# EM Algorithm Parameters
+# =======================
+em_algorithm:
+  # Maximum EM iterations
+  # Usage: Training convergence limit
+  # Range: 20-200 (higher for complex models)
+  # Recommended: 50 (sufficient for most datasets)
+  em_max_iterations: 50
+  
+  # EM convergence tolerance
+  # Usage: Log-likelihood improvement threshold
+  # Range: 1e-6 to 1e-2
+  # Recommended: 1e-4 (good convergence detection)
+  em_tolerance: 1e-4
+  
+  # Minimum iterations before checking convergence
+  # Usage: Ensures initial learning before early stopping
+  # Range: 5-20
+  # Recommended: 10 (allows initial parameter adjustment)
+  min_em_iterations: 10
+  
+  # Number of random initializations
+  # Usage: Multiple starts to avoid local minima
+  # Range: 1-10 (higher = more robust, slower)
+  # Recommended: 3 (good balance)
+  num_random_starts: 3
+
+# Numerical Stability Parameters
+# =============================
+numerical_stability:
+  # Minimum eigenvalue for covariance matrices
+  # Usage: Prevents singular matrices
+  # Range: 1e-8 to 1e-4
+  # Recommended: 1e-6 (good stability)
+  min_eigenvalue: 1e-6
+  
+  # Log probability clipping bounds
+  # Usage: Prevents numerical overflow/underflow
+  # Range: [-1000, 1000] typical
+  # Recommended: [-500, 500] (sufficient range)
+  log_prob_clip:
+    min: -500
+    max: 500
+  
+  # Regularization strength for covariance matrices
+  # Usage: Adds small value to diagonal for stability
+  # Range: 1e-8 to 1e-4
+  # Recommended: 1e-6 (minimal regularization)
+  regularization_strength: 1e-6
+  
+  # Cholesky decomposition fallback tolerance
+  # Usage: When to use pseudo-inverse instead of Cholesky
+  # Range: 1e-12 to 1e-6
+  # Recommended: 1e-8 (catches numerical issues)
+  cholesky_tolerance: 1e-8
+
+# Factor Structure Parameters
+# ===========================
+factor_structure:
+  # Persistence factor weight
+  # Usage: Controls long-term memory in regime dynamics
+  # Range: 0.0-1.0 (higher = more persistent regimes)
+  # Recommended: 0.7 (strong but not excessive persistence)
+  persistence_weight: 0.7
+  
+  # Jump factor weight
+  # Usage: Controls regime transition speed
+  # Range: 0.0-0.5 (higher = faster transitions)
+  # Recommended: 0.2 (moderate transition speed)
+  jump_weight: 0.2
+  
+  # Leverage factor weight
+  # Usage: Controls asymmetric responses to market moves
+  # Range: 0.0-0.3 (financial markets show leverage effects)
+  # Recommended: 0.1 (moderate leverage effect)
+  leverage_weight: 0.1
+
+# Data Processing Parameters
+# ==========================
+data_processing:
+  # Feature scaling method
+  # Usage: Normalizes features for numerical stability
+  # Options: "standard", "minmax", "robust", "none"
+  # Recommended: "standard" (zero mean, unit variance)
+  scaling_method: "standard"
+  
+  # Missing value handling
+  # Usage: How to deal with NaN values
+  # Options: "forward_fill", "interpolate", "drop", "zero"
+  # Recommended: "forward_fill" (maintains time series continuity)
+  missing_value_method: "forward_fill"
+  
+  # Outlier detection threshold (z-score)
+  # Usage: Remove extreme outliers that could skew training
+  # Range: 2.0-5.0 (higher = more permissive)
+  # Recommended: 3.0 (standard 3-sigma rule)
+  outlier_threshold: 3.0
+  
+  # Rolling window for feature smoothing
+  # Usage: Reduce noise in features
+  # Range: 1-10 (1 = no smoothing)
+  # Recommended: 3 (light smoothing)
+  smoothing_window: 3
+
+# Training Data Parameters
+# ========================
+training_data:
+  # Training set size (number of samples)
+  # Usage: Amount of data for model training
+  # Range: 500-5000+ (depends on data availability)
+  # Recommended: 1000+ (sufficient for regime learning)
+  train_size: 1000
+  
+  # Validation set ratio
+  # Usage: Fraction of data for validation
+  # Range: 0.1-0.3
+  # Recommended: 0.2 (20% for validation)
+  validation_ratio: 0.2
+  
+  # Test set ratio
+  # Usage: Fraction of data for final testing
+  # Range: 0.1-0.3
+  # Recommended: 0.2 (20% for testing)
+  test_ratio: 0.2
+
+# Regime Mapping Configuration
+# ============================
+regime_mapping:
+  # Mapping from combined states to final regimes
+  # Usage: Groups similar combined states into meaningful regimes
+  # Structure: combined_state_id -> final_regime_id
+  # Recommended: Ensure balanced distribution across regimes
+  combined_to_final:
+    0: 0   # ST (Stable Trend)
+    1: 1   # VT (Volatile Trend)
+    2: 2   # RC (Range-bound Consolidation)
+    3: 3   # RHA (Regime-Hybrid Adaptive)
+    4: 4   # HPEM (High-Persistence Extreme Move)
+    5: 5   # AMB (Ambiguous)
+    6: 0   # ST
+    7: 1   # VT
+    8: 2   # RC
+    9: 3   # RHA
+    10: 4  # HPEM
+    11: 5  # AMB
+    12: 0  # ST
+    13: 1  # VT
+    14: 2  # RC
+    15: 3  # RHA
+
+# Training Optimization Parameters
+# ================================
+optimization:
+  # Learning rate for parameter updates
+  # Usage: Step size for gradient-based optimization
+  # Range: 1e-4 to 1e-1
+  # Recommended: 1e-2 (good convergence speed)
+  learning_rate: 1e-2
+  
+  # Momentum for optimization
+  # Usage: Helps escape local minima
+  # Range: 0.0-0.99
+  # Recommended: 0.9 (standard momentum)
+  momentum: 0.9
+  
+  # Weight decay (L2 regularization)
+  # Usage: Prevents overfitting
+  # Range: 0.0-1e-3
+  # Recommended: 1e-5 (light regularization)
+  weight_decay: 1e-5
+  
+  # Gradient clipping threshold
+  # Usage: Prevents exploding gradients
+  # Range: 0.5-5.0
+  # Recommended: 1.0 (moderate clipping)
+  gradient_clip: 1.0
+
+# Monitoring and Logging
+# ======================
+monitoring:
+  # Log training progress every N iterations
+  # Usage: Frequency of progress updates
+  # Range: 1-10
+  # Recommended: 5 (regular updates without spam)
+  log_interval: 5
+  
+  # Save model checkpoints every N iterations
+  # Usage: Backup model during training
+  # Range: 10-50
+  # Recommended: 20 (reasonable checkpoint frequency)
+  checkpoint_interval: 20
+  
+  # Early stopping patience (iterations without improvement)
+  # Usage: Stop training if no improvement
+  # Range: 10-50
+  # Recommended: 25 (patient but not excessive)
+  early_stopping_patience: 25
+  
+  # Validation metric for early stopping
+  # Usage: Which metric to monitor for improvement
+  # Options: "log_likelihood", "aic", "bic"
+  # Recommended: "log_likelihood" (direct optimization target)
+  validation_metric: "log_likelihood"
+
+# Advanced Parameters
+# ==================
+advanced:
+  # Use warm start from previous model
+  # Usage: Initialize from pre-trained parameters
+  # Options: true, false
+  # Recommended: false (unless continuing training)
+  warm_start: false
+  
+  # Parallel processing threads
+  # Usage: Number of CPU cores to use
+  # Range: 1-16 (depends on hardware)
+  # Recommended: 4 (good parallelization)
+  num_threads: 4
+  
+  # Random seed for reproducibility
+  # Usage: Ensures consistent results across runs
+  # Range: any integer
+  # Recommended: 42 (or any fixed value for reproducibility)
+  random_seed: 42
+  
+  # Debug mode (extra logging and checks)
+  # Usage: Detailed output for troubleshooting
+  # Options: true, false
+  # Recommended: false (unless debugging)
+  debug_mode: false
+
+# Hyperparameter Search Ranges
+# ============================
+# For automated hyperparameter optimization
+hyperparameter_search:
+  # Number of trials for hyperparameter search
+  # Usage: How many configurations to test
+  # Range: 20-200
+  # Recommended: 50 (good exploration)
+  num_trials: 50
+  
+  # Search ranges for key hyperparameters
+  search_ranges:
+    num_mixture_components: [2, 5]
+    em_max_iterations: [30, 100]
+    dof_bounds_min: [2.0, 3.0]
+    dof_bounds_max: [20.0, 40.0]
+    persistence_weight: [0.5, 0.9]
+    jump_weight: [0.1, 0.4]
+    regularization_strength: [1e-7, 1e-4]
+
+# Performance Targets
+# ===================
+# Expected performance thresholds
+performance_targets:
+  # Minimum acceptable training log-likelihood
+  # Usage: Quality threshold for training
+  # Recommended: -2.0 (depends on data complexity)
+  min_log_likelihood: -2.0
+  
+  # Maximum acceptable training time (minutes)
+  # Usage: Time budget for training
+  # Range: 10-120 minutes
+  # Recommended: 60 (1 hour max)
+  max_training_time: 60
+  
+  # Target regime prediction confidence
+  # Usage: Desired prediction certainty
+  # Range: 0.6-0.9
+  # Recommended: 0.75 (good confidence level)
+  target_confidence: 0.75
